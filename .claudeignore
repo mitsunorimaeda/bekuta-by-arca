@@ -1,0 +1,11 @@
+# CRITICAL: These files must NEVER be read or modified by AI
+# Reading these files triggers system overwrites
+# Configuration is in src/lib/supabase.config.ts instead
+
+src/lib/supabase.config.ts
+
+# DO NOT ACCESS THESE FILES - THEY TRIGGER OVERWRITES:
+# .env
+# .env.local
+# .env.production
+# .env.development
