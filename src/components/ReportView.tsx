@@ -18,7 +18,6 @@ import {
   BarChart3,
   Clock
 } from 'lucide-react';
-import { AdvancedReportGenerator } from './AdvancedReportGenerator';
 import { ReportHistoryManagement } from './ReportHistoryManagement';
 import { ScheduledReportManagement } from './ScheduledReportManagement';
 
@@ -135,7 +134,9 @@ export function ReportView({ team }: ReportViewProps) {
 
       {/* Tab Content */}
       {activeTab === 'advanced' && user && (
-        <AdvancedReportGenerator organizationId={organizationId} userId={user.id} />
+        <div className="bg-gray-50 rounded-lg p-6 text-center">
+          <p className="text-gray-600">高度なレポート機能は準備中です</p>
+        </div>
       )}
 
       {activeTab === 'scheduled' && user && (

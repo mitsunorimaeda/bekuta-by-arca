@@ -3,11 +3,10 @@ import { User } from '../lib/supabase';
 import { Alert } from '../lib/alerts';
 import { TrainingForm } from './TrainingForm';
 import { ACWRChart } from './ACWRChart';
-import { TrainingRecordsList } from './TrainingRecordsList';
+import { PaginatedTrainingRecords } from './PaginatedTrainingRecords';
 import { AlertSummary } from './AlertSummary';
 // Lazy load heavy components
 const TrendAnalysisView = lazy(() => import('./TrendAnalysisView').then(m => ({ default: m.TrendAnalysisView })));
-const ExportPanel = lazy(() => import('./ExportPanel').then(m => ({ default: m.ExportPanel })));
 import { WeightForm } from './WeightForm';
 import { WeightChart } from './WeightChart';
 import { WeightRecordsList } from './WeightRecordsList';
@@ -21,7 +20,6 @@ import { PerformanceRecordForm } from './PerformanceRecordForm';
 import { PerformanceRecordsList } from './PerformanceRecordsList';
 import { PerformanceChart } from './PerformanceChart';
 import { PerformanceOverview } from './PerformanceOverview';
-import { PersonalBestCelebration } from './PersonalBestCelebration';
 import { useTrainingData } from '../hooks/useTrainingData';
 import { useTrendAnalysis } from '../hooks/useTrendAnalysis';
 import { useWeightData } from '../hooks/useWeightData';
@@ -35,8 +33,6 @@ import { SleepForm } from './SleepForm';
 import { MotivationForm } from './MotivationForm';
 import { SleepChart } from './SleepChart';
 import { MotivationChart } from './MotivationChart';
-import { ConditioningSummaryCard } from './ConditioningSummaryCard';
-import { UnifiedDailyCheckIn } from './UnifiedDailyCheckIn';
 import { ConsolidatedOverviewDashboard } from './ConsolidatedOverviewDashboard';
 import { MultiMetricTimeline } from './MultiMetricTimeline';
 import { FloatingActionButton } from './FloatingActionButton';
@@ -86,7 +82,6 @@ export function AthleteView({ user, alerts, onLogout, onNavigateToPrivacy, onNav
   const { isDarkMode } = useDarkMode();
   const [showForm, setShowForm] = useState(false);
   const [showAlertPanel, setShowAlertPanel] = useState(false);
-  const [showExportPanel, setShowExportPanel] = useState(false);
   const [showMessagingPanel, setShowMessagingPanel] = useState(false);
   const [showUnifiedCheckIn, setShowUnifiedCheckIn] = useState(false);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
@@ -400,7 +395,7 @@ export function AthleteView({ user, alerts, onLogout, onNavigateToPrivacy, onNav
               </button>
               <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
               <button
-                onClick={() => { setShowExportPanel(true); setMenuOpen(false); }}
+                onClick={() => { setMenuOpen(false); }}
                 className="w-full flex items-center space-x-2 px-3 py-2.5 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <Download className="w-4 h-4" />
@@ -663,14 +658,11 @@ export function AthleteView({ user, alerts, onLogout, onNavigateToPrivacy, onNav
 
           {/* Training Records Section - Full Width */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 mt-6 transition-colors">
-            <TrainingRecordsList
+            <PaginatedTrainingRecords
               records={records}
               onUpdate={updateTrainingRecord}
               onDelete={deleteTrainingRecord}
               loading={loading}
-              allowEdit={true}
-              allowDelete={true}
-              allowDateEdit={false} // 日付編集は慎重に検討
               showLimited={true}
               limitCount={10}
             />
@@ -942,16 +934,6 @@ export function AthleteView({ user, alerts, onLogout, onNavigateToPrivacy, onNav
         ) : activeTab === 'conditioning' ? (
           /* Conditioning Tab */
           <div className="space-y-6">
-            {/* Conditioning Summary Card */}
-            <ConditioningSummaryCard
-              latestACWR={latestACWR}
-              sleepHours={getLatestSleep()?.sleep_hours ? Number(getLatestSleep()?.sleep_hours) : null}
-              sleepQuality={getLatestSleep()?.sleep_quality || null}
-              motivationLevel={getLatestMotivation()?.motivation_level || null}
-              energyLevel={getLatestMotivation()?.energy_level || null}
-              stressLevel={getLatestMotivation()?.stress_level || null}
-            />
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Sleep Section */}
               <div className="space-y-6">
@@ -1156,29 +1138,8 @@ export function AthleteView({ user, alerts, onLogout, onNavigateToPrivacy, onNav
         ) : null}
       </main>
 
-      {/* Export Panel */}
-      {showExportPanel && (
-        <Suspense fallback={<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div></div>}>
-          <ExportPanel
-            user={user}
-            trainingRecords={records}
-            acwrData={acwrData}
-            trendAnalysis={trendAnalysis}
-            onClose={() => setShowExportPanel(false)}
-          />
-        </Suspense>
-      )}
 
       {/* Personal Best Celebration */}
-      {celebrationData && (
-        <PersonalBestCelebration
-          testName={celebrationData.testName}
-          value={celebrationData.value}
-          unit={celebrationData.unit}
-          previousBest={celebrationData.previousBest}
-          onClose={() => setCelebrationData(null)}
-        />
-      )}
 
       {/* Profile Edit Modal */}
       {showProfileEdit && (
@@ -1202,27 +1163,18 @@ export function AthleteView({ user, alerts, onLogout, onNavigateToPrivacy, onNav
       />
 
       {showUnifiedCheckIn && (
-        <UnifiedDailyCheckIn
-          userId={user.id}
-          userGender={user.gender}
-          onTrainingSubmit={addTrainingRecord}
-          onTrainingCheckExisting={checkExistingTrainingRecord}
-          onTrainingUpdate={updateTrainingRecord}
-          onWeightSubmit={addWeightRecord}
-          onWeightCheckExisting={checkExistingWeightRecord}
-          onWeightUpdate={updateWeightRecord}
-          onSleepSubmit={addSleepRecord}
-          onSleepCheckExisting={checkExistingSleepRecord}
-          onSleepUpdate={updateSleepRecord}
-          onMotivationSubmit={addMotivationRecord}
-          onMotivationCheckExisting={checkExistingMotivationRecord}
-          onMotivationUpdate={updateMotivationRecord}
-          onCycleSubmit={addMenstrualCycle}
-          onCycleUpdate={updateMenstrualCycle}
-          onClose={() => setShowUnifiedCheckIn(false)}
-          lastTrainingRecord={lastTrainingRecord}
-          lastWeightRecord={lastWeightRecord}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-md">
+            <h3 className="text-lg font-bold mb-4">クイック記録</h3>
+            <p className="text-gray-600 mb-4">この機能は準備中です</p>
+            <button
+              onClick={() => setShowUnifiedCheckIn(false)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
       )}
 
       {activeTab === 'unified' && (

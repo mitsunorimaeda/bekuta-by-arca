@@ -11,7 +11,6 @@ import { LevelProgressCard } from './LevelProgressCard';
 import { BadgeCollection } from './BadgeCollection';
 import { BadgeEarnedModal } from './BadgeEarnedModal';
 import { GoalManagement } from './GoalManagement';
-import { TeamRankings } from './TeamRankings';
 import { LevelUpModal } from './LevelUpModal';
 import { TutorialController } from './TutorialController';
 import { getTutorialSteps } from '../lib/tutorialContent';
@@ -243,11 +242,9 @@ export function GamificationView({ userId, userTeamId }: GamificationViewProps) 
             <Users className="w-5 h-5 text-blue-500" />
             <span>チームランキング</span>
           </h3>
-          <TeamRankings
-            weeklyRankings={weeklyRankings}
-            pointsRankings={pointsRankings}
-            myUserId={userId}
-          />
+          <div className="bg-gray-50 rounded-lg p-6 text-center">
+            <p className="text-gray-600">ランキング機能は準備中です</p>
+          </div>
         </div>
       </div>
 
